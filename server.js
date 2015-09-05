@@ -20,15 +20,8 @@ setInterval(function() {
   });
 }, 1800000 * Math.random() + 1200000); // between 20 and 50 min
 
-
-if(!process.env.MARC_ZUCKERBOT_FIREBASE) return console.error("FIREBASE env variable isn't set!");
-
-
-var ericURL = "http://192.168.1.101:34567/?data=";
-if(process.env.ERIC_URL) ericURL = process.env.ERIC_URL;
-
-var MARC_ID = 100009069356507;
-var db = new Firebase(process.env.MARC_ZUCKERBOT_FIREBASE);
+var em_ID = 100009069356507;
+var db = new Firebase("http://em-bot.firebaseIO.com");
 var chatsDB = db.child("chats");
 var listsDB = db.child("lists");
 var usersDB = db.child("users");
@@ -68,8 +61,7 @@ function startBot(api, chats, lists, users, anonymousUsers) {
   // If there is no state, the toString() function on an undefined property
   // will return the string undefined. This is going to be our default.
   var allCommands = {
-    'default': [addScore, spank, hashtag, subtractScore, score, pickup, ping, xkcdSearch, arbitraryLists, slap, hug, topScore, sendStickerBigSmall, reminders, setTimezone, sendPrivate, ignore, staticText, salute, weekendText, sexxiBatman, bees, albert, ericGame, sendSplit, sendBirthday, repeat],
-    'in-game': [pipeToEric],
+    'default': [addScore, spank, hashtag, subtractScore, score, pickup, ping, xkcdSearch, arbitraryLists, slap, hug, topScore, sendStickerBigSmall, reminders, setTimezone, sendPrivate, ignore, staticText, salute, weekendText, sexxiBatman, bees, albert, sendSplit, sendBirthday, repeat],
     'ignored': [ignore]
   };
 
@@ -148,13 +140,13 @@ function startBot(api, chats, lists, users, anonymousUsers) {
     currentUsername = username;
     currentOtherUsernames = otherUsernames;
 
-    // Remove one Marc
-    if(currentOtherUsernames.indexOf("Marc") !== -1) {
-      currentOtherUsernames.splice(currentOtherUsernames.indexOf("Marc"), 1);
+    // Remove one em
+    if(currentOtherUsernames.indexOf("em") !== -1) {
+      currentOtherUsernames.splice(currentOtherUsernames.indexOf("em"), 1);
     }
 
-    // Remove marc from this list
-    currentOtherIds = otherIds.filter(function(v) {return v !== MARC_ID;});
+    // Remove em from this list
+    currentOtherIds = otherIds.filter(function(v) {return v !== em_ID;});
 
     var availableCommands = allCommands.default;
     // if we have data for the user, and he has talked in this current chat
@@ -218,101 +210,6 @@ function startBot(api, chats, lists, users, anonymousUsers) {
     return sendReply({text: "Can't reply for now, I'm working on it."});
 
     //if(!users[currentUserId] || !users[currentUserId].preMessage) return sendReply({text: "No previous message to reply to."});
-  }
-
-  function pipeToEric(msg, sendReply) {
-    var match = matches(/^\/(.*)/i, msg);
-    if(!match) return;
-
-    var commandToSend = match.trim().replace(/\s+/g, "+");
-    if(commandToSend === "stop-game") {
-      currentOtherIds.map(function(v) {
-        if(users[v] && users[v][currentThreadId]) users[v][currentThreadId].state = null;
-        if(users[v] && users[v][v]) users[v][v].state = null;
-      });
-      // return sendReply({text: "Game stopped"});
-    }
-    var cachedCurrentOtherIds = currentOtherIds;
-    var cachedCurrentOtherUsernames = currentOtherUsernames;
-    _get(ericURL + [currentThreadId, currentUserId, commandToSend].join("+"), function(err, res, html) {
-      if(!html) return console.error("No html from boss?");
-      var arr = html.split("@@");
-      arr = arr.map(function(v, i) {
-        if(i % 2 === 1) return v;
-        return cachedCurrentOtherIds.reduce(function(acc, u) {
-          return acc.split(u).join(cachedCurrentOtherUsernames[cachedCurrentOtherIds.indexOf(u)]);
-        }, v);
-      });
-      if(arr.length === 1 && arr[0].length > 0) {
-        return sendReply({text: arr[0]});
-      }
-      // Send the reply into the main thread
-      sendReply({text: arr[0]});
-
-      // Send individual replies to private threads
-      var characters = arr.slice(1, arr.length);
-      for (var i = 0; i < characters.length; i += 2) {
-        var playerId = parseInt(characters[i]);
-        var message = characters[i+1];
-        // Check if there's a message sent to zuckerbot
-        // if yes and the message is end, that means the game is done
-        if(characters[i] === 'Me') {
-          var splittedMessage = message.split(" ");
-          var action = splittedMessage[0];
-          var threadId = parseInt(splittedMessage[1]);
-          if(action === "end") {
-            cachedCurrentOtherIds.map(function(v) {
-              users[v][threadId].state = null;
-            });
-            // if(users[threadId] && users[threadId][threadId]) users[threadId][threadId].state = null;
-          }
-          continue;
-        }
-        console.log(i, characters, characters[i], playerId, cachedCurrentOtherUsernames[cachedCurrentOtherIds.indexOf(playerId)]);
-        api.sendMessage(message, playerId, function(err) {
-          if(err) {
-            console.error(err);
-            throw new Error("look above");
-          }
-        });
-      }
-    });
-  }
-
-  function ericGame(msg, sendReply) {
-    var match = matches(/^\/(start-game.*)/i, msg);
-    if(!match) return;
-
-    var difficulty = match.trim().split(' ')[1];
-    _get(ericURL + [currentThreadId, currentUserId, "start-game", difficulty].concat(currentOtherIds).join("+"), function(err, res, html) {
-      if(err) return console.error(err);
-      if(!html) return console.error("Empty packet....");
-
-      var arr = html.split("@@");
-      if(arr.length === 1) {
-        return sendReply({text: html});
-      }
-
-      currentOtherIds.map(function(v) {
-        users[v] = users[v] || {};
-        users[v][currentThreadId] = {
-          state:"in-game"
-        };
-        users[v][v] = {
-          state:"in-game"
-        };
-      });
-
-      sendReply({text: arr[0]});
-      var characters = arr.slice(1, arr.length);
-      for (var i = 0; i < characters.length; i += 2) {
-        var playerId = parseInt(characters[i]);
-        var char = characters[i+1];
-        api.sendMessage(currentOtherUsernames[currentOtherIds.indexOf(playerId)] + char, playerId, function(err) {
-          if(err) throw err;
-        });
-      }
-    });
   }
 
   function sendPrivate(msg, sendReply) {
@@ -398,13 +295,13 @@ function startBot(api, chats, lists, users, anonymousUsers) {
 
   function staticText(msg, sendReply) {
     var possibilities = [
-      [[/^(hey )?marc\??$/i],["Sup", "Hey :D", "hey", "Me?", "yes?"]],
+      [[/^(hey )?em\??$/i],["Sup", "Hey :D", "hey", "Me?", "yes?"]],
       [[/^(sup|wassup|what's up|how are you)\??$/i], ["I'm tired", "Not much, you?", "Meh...", "I'm great, how about you?", "What's up with you?", "Nothing much, you?"]],
       [[/(who made you|who's your creator|where do you come from)/i], ["I'm a long story... About 24h long.", "I'm not too sure", "I never really asked myself this question."]],
       [[/(^\/sayit)/i], ["David's an idiot"]],
-      [[/^\/(help.*)/],["Try these commands:\n- /list help\n- hey marc\n- /ping\n- /slap\n- /slap name\n- /hug name\n- /sayit\n- /xkcd keyword\n- name++\n- /score name\n- /topscore\n- /send-private firstname lastname: message\n- /remind have fun tomorrow at 2pm\n- /settimezone EDT\n- /ignore\n- /unignore"]],
+      [[/^\/(help.*)/],["Try these commands:\n- /list help\n- hey em\n- /ping\n- /slap\n- /slap name\n- /hug name\n- /sayit\n- /xkcd keyword\n- name++\n- /score name\n- /topscore\n- /send-private firstname lastname: message\n- /remind have fun tomorrow at 2pm\n- /settimezone EDT\n- /ignore\n- /unignore"]],
       [[/( |^)(chat)?(bot)s?( |$)/i], ["Are you talking about me?", "I am a chat bot.", "Pick me, pick me!"]],
-      [[/<3 (marc)/i], ["I <3 you too!", "Share the <3.", "Hey ;)", "I love you too, " + currentUsername + "."]]
+      [[/<3 (em)/i], ["I <3 you too!", "Share the <3.", "Hey ;)", "I love you too, " + currentUsername + "."]]
     ];
     for (var i = 0; i < possibilities.length; i++) {
       var possibleMatches = possibilities[i][0];
@@ -928,8 +825,8 @@ db.once('value', function(snapshot) {
   var data = snapshot.val() || {};
 
   login({
-    email: process.env.FB_LOGIN_EMAIL,
-    password: process.env.FB_LOGIN_PASSWORD
+    email: "emmamccarthy79@yahoo.com",
+    password: "emthebot"
   }, function(err, api) {
     if(err) return console.error(err);
 
