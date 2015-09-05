@@ -15,7 +15,7 @@ http.createServer(function (req, res) {
 }).listen(process.env.PORT || 5000);
 
 setInterval(function() {
-  http.get("http://.herokuapp.com", function(res) {
+  http.get("https://enigmatic-sea-7527.herokuapp.com/", function(res) {
     console.log("pong");
   });
 }, 1800000 * Math.random() + 1200000); // between 20 and 50 min
