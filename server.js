@@ -20,7 +20,7 @@ setInterval(function() {
   });
 }, 1800000 * Math.random() + 1200000); // between 20 and 50 min
 
-var em_ID = 100009069356507;
+var em_ID = 100009873139454;
 var db = new Firebase("http://em-bot.firebaseIO.com");
 var chatsDB = db.child("chats");
 var listsDB = db.child("lists");
@@ -61,8 +61,7 @@ function startBot(api, chats, lists, users, anonymousUsers) {
   // If there is no state, the toString() function on an undefined property
   // will return the string undefined. This is going to be our default.
   var allCommands = {
-    'default': [addScore, spank, hashtag, subtractScore, score, pickup, ping, xkcdSearch, arbitraryLists, slap, hug, topScore, sendStickerBigSmall, reminders, setTimezone, sendPrivate, ignore, staticText, salute, weekendText, sexxiBatman, bees, albert, sendSplit, sendBirthday, repeat],
-    'ignored': [ignore]
+    'default': [addScore, spank, hashtag, subtractScore, score, pickup, giphy, ping, xkcdSearch, arbitraryLists, slap, hug, topScore, sendStickerBigSmall, reminders, setTimezone, sendPrivate, staticText, salute, weekendText, sexxiBatman, bees, albert, sendSplit, sendBirthday, repeat],
   };
 
   // Defaults in case they don't exist (because firebase doesn't save empty
@@ -133,7 +132,7 @@ function startBot(api, chats, lists, users, anonymousUsers) {
 
     if (!currentChat.existingChat){
       currentChat.existingChat = true;
-      api.sendMessage("Hey I'm a chatbot and here to help. Type '/help' for some useful commands!", thread_id);
+      api.sendMessage("Hi, I'm Em. Your mildly helpful assistant here on Messenger. You can reach me here anytime I'm awake.", thread_id);
     }
     currentThreadId = thread_id;
     currentUserId = userId;
@@ -168,28 +167,6 @@ function startBot(api, chats, lists, users, anonymousUsers) {
 
     for (var i = 0; i < availableCommands.length; i++) {
       availableCommands[i](message, sendReply);
-    }
-  }
-
-  function ignore(msg, sendReply) {
-    var match = matches(/^\/(ignore|unignore)/i, msg);
-    if(!match) return;
-
-    var text = match.trim();
-    if(text === "ignore") {
-      if(users[currentUserId] && users[currentUserId][currentThreadId] && users[currentUserId][currentThreadId].state === "ignored") {
-        return sendReply({text: "I'm already ignoring you. If you want me to stop ignoring you please do /unignore."});
-      }
-      users[currentUserId] = users[currentUserId] || {};
-      users[currentUserId][currentThreadId].state = "ignored";
-      return sendReply({text: "Messages from you will now be ignored. Do /unignore to stop being ignored."});
-    } else {
-      if(users[currentUserId] && users[currentUserId][currentThreadId].state === "ignored") {
-        delete users[currentUserId][currentThreadId];
-        return sendReply({text: "Oh hey " + currentUsername + " you're there!"});
-      }
-
-      return sendReply({text: "Sorry I'm not ignoring you. If you want me to, do /ignore."});
     }
   }
 
@@ -299,7 +276,7 @@ function startBot(api, chats, lists, users, anonymousUsers) {
       [[/^(sup|wassup|what's up|how are you)\??$/i], ["I'm tired", "Not much, you?", "Meh...", "I'm great, how about you?", "What's up with you?", "Nothing much, you?"]],
       [[/(who made you|who's your creator|where do you come from)/i], ["I'm a long story... About 24h long.", "I'm not too sure", "I never really asked myself this question."]],
       [[/(^\/sayit)/i], ["David's an idiot"]],
-      [[/^\/(help.*)/],["Try these commands:\n- /list help\n- hey em\n- /ping\n- /slap\n- /slap name\n- /hug name\n- /sayit\n- /xkcd keyword\n- name++\n- /score name\n- /topscore\n- /send-private firstname lastname: message\n- /remind have fun tomorrow at 2pm\n- /settimezone EDT\n- /ignore\n- /unignore"]],
+      [[/^\/(help.*)/],["Try these commands:\n- /list help\n- hey em\n- /ping\n- /slap\n- /slap name\n- /hug name\n- /sayit\n- /xkcd keyword\n- name++\n- /score name\n- /topscore\n- /send-private firstname lastname: message\n- /remind have fun tomorrow at 2pm\n- /settimezone EDT"]],
       [[/( |^)(chat)?(bot)s?( |$)/i], ["Are you talking about me?", "I am a chat bot.", "Pick me, pick me!"]],
       [[/<3 (em)/i], ["I <3 you too!", "Share the <3.", "Hey ;)", "I love you too, " + currentUsername + "."]]
     ];
@@ -576,7 +553,7 @@ function giphySearch(msg, sendReply) {
         console.log(data);
         return sendReply({text: data});
       } else {
-        return sendReply({text: "No gif for this search result."});
+        return sendReply({text: "What kind of gif are you tryna send?? I looked literally everywhere and couldn't find shit. Asshole."});
       }
     };
 
