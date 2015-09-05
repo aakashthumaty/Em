@@ -6,6 +6,7 @@ var phonetic = require("phonetic");
 var request = require("request");
 var datajs = require("datajs");
 var cheerio = require("cheerio");
+var sys = require('util');
 
 // Little binding to prevent heroku from complaining about port binding
 var http = require('http');
@@ -544,7 +545,7 @@ function gif(msg, sendReply) {
     var strippedString = msg.replace(/^\s+|\s+$/g, '');
     strippedString = strippedString.replace("gif", '');
 
-    // var XMLHttpRequest = require("xmlhttprequest").XMLHttpRequest;
+  var XMLHttpRequest = require("xmlhttprequest").XMLHttpRequest;
     var request = new XMLHttpRequest();
     request.open('GET', 'http://api.giphy.com/v1/gifs/random?api_key=dc6zaTOxFJmzC&tag='+strippedString, false);
 
