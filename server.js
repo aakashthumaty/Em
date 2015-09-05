@@ -4,7 +4,9 @@ var Firebase = require("firebase");
 var shortId = require('shortid');
 var phonetic = require("phonetic");
 var request = require("request");
+var datajs = require("datajs");
 var cheerio = require("cheerio");
+var sys = require('util');
 
 // Little binding to prevent heroku from complaining about port binding
 var http = require('http');
@@ -61,7 +63,11 @@ function startBot(api, chats, lists, users, anonymousUsers) {
   // If there is no state, the toString() function on an undefined property
   // will return the string undefined. This is going to be our default.
   var allCommands = {
+<<<<<<< HEAD
     'default': [addScore, spank, hashtag, subtractScore, score, pickup, giphy, ping, xkcdSearch, arbitraryLists, slap, hug, topScore, sendStickerBigSmall, reminders, setTimezone, sendPrivate, staticText, salute, weekendText, sexxiBatman, bees, albert, sendSplit, sendBirthday, repeat, wheather],
+=======
+    'default': [addScore, spank, hashtag, subtractScore, score, pickup, gif, ping, xkcdSearch, arbitraryLists, slap, hug, topScore, sendStickerBigSmall, reminders, setTimezone, sendPrivate, staticText, salute, weekendText, sexxiBatman, bees, albert, sendSplit, sendBirthday, repeat],
+>>>>>>> e8293d1f70764a6e3c8b4d1b612a4d320d765794
   };
 
   // Defaults in case they don't exist (because firebase doesn't save empty
@@ -539,13 +545,13 @@ function xkcdSearch(msg, sendReply) {
   });
 }
 
-function giphySearch(msg, sendReply) {
+function gif(msg, sendReply) {
   var data = "";
-  if(msg.indexOf("giphy") > -1) {
+  if(msg.indexOf("gif") > -1) {
     var strippedString = msg.replace(/^\s+|\s+$/g, '');
-    strippedString = strippedString.replace("giphy", '');
+    strippedString = strippedString.replace("gif", '');
 
-    var XMLHttpRequest = require("xmlhttprequest").XMLHttpRequest;
+  var XMLHttpRequest = require("xmlhttprequest").XMLHttpRequest;
     var request = new XMLHttpRequest();
     request.open('GET', 'http://api.giphy.com/v1/gifs/random?api_key=dc6zaTOxFJmzC&tag='+strippedString, false);
 
