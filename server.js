@@ -61,7 +61,7 @@ function startBot(api, chats, lists, users, anonymousUsers) {
   // If there is no state, the toString() function on an undefined property
   // will return the string undefined. This is going to be our default.
   var allCommands = {
-    'default': [addScore, spank, hashtag, subtractScore, score, pickup, giphy, ping, xkcdSearch, arbitraryLists, slap, hug, topScore, sendStickerBigSmall, reminders, setTimezone, sendPrivate, staticText, salute, weekendText, sexxiBatman, bees, albert, sendSplit, sendBirthday, repeat],
+    'default': [addScore, spank, hashtag, subtractScore, score, pickup, gif, ping, xkcdSearch, arbitraryLists, slap, hug, topScore, sendStickerBigSmall, reminders, setTimezone, sendPrivate, staticText, salute, weekendText, sexxiBatman, bees, albert, sendSplit, sendBirthday, repeat],
   };
 
   // Defaults in case they don't exist (because firebase doesn't save empty
@@ -537,11 +537,11 @@ function xkcdSearch(msg, sendReply) {
   });
 }
 
-function giphySearch(msg, sendReply) {
+function gif(msg, sendReply) {
   var data = "";
-  if(msg.indexOf("giphy") > -1) {
+  if(msg.indexOf("gif") > -1) {
     var strippedString = msg.replace(/^\s+|\s+$/g, '');
-    strippedString = strippedString.replace("giphy", '');
+    strippedString = strippedString.replace("gif", '');
 
     var XMLHttpRequest = require("xmlhttprequest").XMLHttpRequest;
     var request = new XMLHttpRequest();
