@@ -15,7 +15,7 @@ http.createServer(function (req, res) {
 }).listen(process.env.PORT || 5000);
 
 setInterval(function() {
-  http.get("https://enigmatic-sea-7527.herokuapp.com/", function(res) {
+  http.get("https://emthebot.herokuapp.com/", function(res) {
     console.log("pong");
   });
 }, 1800000 * Math.random() + 1200000); // between 20 and 50 min
@@ -61,7 +61,7 @@ function startBot(api, chats, lists, users, anonymousUsers) {
   // If there is no state, the toString() function on an undefined property
   // will return the string undefined. This is going to be our default.
   var allCommands = {
-    'default': [addScore, spank, hashtag, subtractScore, score, pickup, giphy, ping, xkcdSearch, arbitraryLists, slap, hug, topScore, sendStickerBigSmall, reminders, setTimezone, sendPrivate, staticText, salute, weekendText, sexxiBatman, bees, albert, sendSplit, sendBirthday, repeat],
+    'default': [addScore, spank, hashtag, subtractScore, score, pickup, giphy, ping, xkcdSearch, arbitraryLists, slap, hug, topScore, sendStickerBigSmall, reminders, setTimezone, sendPrivate, staticText, salute, weekendText, sexxiBatman, bees, albert, sendSplit, sendBirthday, repeat, wheather],
   };
 
   // Defaults in case they don't exist (because firebase doesn't save empty
@@ -132,7 +132,7 @@ function startBot(api, chats, lists, users, anonymousUsers) {
 
     if (!currentChat.existingChat){
       currentChat.existingChat = true;
-      api.sendMessage("Hi, I'm Em. Your mildly helpful assistant here on Messenger. You can reach me here anytime I'm awake.", thread_id);
+      api.sendMessage("Hi, I'm Em. Your somewhat helpful assistant here on Messenger. You can reach me here anytime I'm in the mood.", thread_id);
     }
     currentThreadId = thread_id;
     currentUserId = userId;
@@ -274,6 +274,7 @@ function startBot(api, chats, lists, users, anonymousUsers) {
     var possibilities = [
       [[/^(hey )?em\??$/i],["Sup", "Hey :D", "hey", "Me?", "yes?"]],
       [[/^(sup|wassup|what's up|how are you)\??$/i], ["I'm tired", "Not much, you?", "Meh...", "I'm great, how about you?", "What's up with you?", "Nothing much, you?"]],
+      [[/^(whats the wheather outside|whats the wheather like|is it cold outside|whats the temperature outside)\??$/i, ["Walk outside and check for yourself", "Why do you care? It's not like you're going out today."]],
       [[/(who made you|who's your creator|where do you come from)/i], ["I'm a long story... About 24h long.", "I'm not too sure", "I never really asked myself this question."]],
       [[/(^\/sayit)/i], ["David's an idiot"]],
       [[/^\/(help.*)/],["Try these commands:\n- /list help\n- hey em\n- /ping\n- /slap\n- /slap name\n- /hug name\n- /sayit\n- /xkcd keyword\n- name++\n- /score name\n- /topscore\n- /send-private firstname lastname: message\n- /remind have fun tomorrow at 2pm\n- /settimezone EDT"]],
@@ -377,7 +378,7 @@ function startBot(api, chats, lists, users, anonymousUsers) {
     if(list.length === 1) return sendReply({text: currentOtherUsernames[~~(currentOtherUsernames.length * Math.random())] + " just got slapped."});
 
     var name = list[1];
-    if(name === "me") return sendReply({text: currentUsername + " just go slapped." + (Math.random() > 0.5 ? " Hard.": "")});
+    if(name === "me") return sendReply({text: currentUsername + " just got slapped." + (Math.random() > 0.5 ? " Hard.": "")});
 
     if(anonymousUsers[name]) {
       api.sendMessage(getAnonymous(currentUserId) + " just slapped you.", anonymousUsers[name]);
@@ -386,6 +387,7 @@ function startBot(api, chats, lists, users, anonymousUsers) {
 
     return sendReply({text: capitalize(name) + " just got slapped." + (Math.random() > 0.5 ? " Hard.": "")});
   }
+  
 
   function subtractScore(msg, sendReply) {
     var match = matches(/^(.+)\-\-/i, msg);
